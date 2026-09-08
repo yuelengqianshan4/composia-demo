@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="CompoSIA 推理效果展示：生成视频、原始真值与 BBox 同步播放，涵盖场景、控制编辑和推理边界。">
+<title>CompoSIA 推理演示</title>
+<style>
+*{box-sizing:border-box}
+body{font:16px/1.6 system-ui,sans-serif;margin:28px auto;padding:0 24px;max-width:2000px;background:#f5f6f8;color:#192331}
+h1{margin-bottom:8px}h2{font-size:21px;margin:0 0 8px}p{margin:10px 0}
+main{display:grid;grid-template-columns:minmax(0,1fr);gap:24px}
+article{min-width:0;background:white;padding:20px;border:1px solid #dbe0e7;border-radius:8px;margin-bottom:24px}
+main article{margin-bottom:0}
+main+article{margin-top:24px}
+.comparison-scroll{overflow-x:auto;margin:18px 0 12px;padding-bottom:8px}
+.comparison-row{display:grid;grid-template-columns:repeat(4,minmax(260px,1fr));gap:16px;align-items:start}
+figure{min-width:0;margin:0}
+figcaption{font-weight:600;margin:0 0 10px}
+video{display:block;width:100%;aspect-ratio:2/1;background:#111;border-radius:4px}
+.preview-image{display:block;width:100%;height:auto;border:1px solid #dbe0e7;border-radius:4px}
+a{color:#145bb5}a:hover{text-decoration:underline}
+.media-link{display:block}.preview-hint{font-size:13px;font-weight:400;color:#596779}
+@media(max-width:700px){body{padding:0 12px}article{padding:14px}}
+
+footer{font-size:14px;color:#596779;margin:24px 0}header{margin-bottom:24px}
+</style>
+</head>
+<body>
+<header>
+<h1>CompoSIA 推理演示</h1>
+<p>点击同一行任意视频，生成视频、原始真值和 BBox 同步播放、暂停和拖动进度。六帧预览可点击放大，窄窗口可横向滚动。</p>
+<p>默认参数：256×512 · 33 帧 · 50 步 · CFG 6 · seed 42。输入为首帧图像和未来 Action/BBox 控制。10 步、65 帧及 seed 43 对照在各组标题注明。</p>
+<p>33 帧覆盖约 2.5–2.7 秒真实场景，播放为 3.3 秒；65 帧覆盖约 5.1 秒，播放为 6.5 秒。</p>
+</header>
+<main>
+<article><h2>白天前进 · scene-0017</h2><p>整体结构与前进趋势保留，标线、路牌和行人细节漂移。</p>
+<div class="comparison-scroll"><div class="comparison-row">
+<figure><figcaption>生成视频</figcaption><video controls muted playsinline preload="metadata" aria-label="生成视频" src="assets/01/generated.mp4"></video></figure>
+<figure><figcaption>原始真值</figcaption><video controls muted playsinline preload="metadata" aria-label="原始真值" src="assets/01/ground-truth.mp4"></video></figure>
+<figure><figcaption>BBox</figcaption><video controls muted playsinline preload="metadata" aria-label="BBox" src="assets/01/bbox.mp4"></video></figure>
+<figure><figcaption>六帧预览 <span class="preview-hint">点击放大 · 左生成 / 右真值</span></figcaption><a class="media-link" href="assets/01/preview.jpg" target="_blank" rel="noopener"><img class="preview-image" loading="lazy" src="assets/01/preview.jpg" alt="六个时间点的生成画面与原始真值对照"></a></figure>
+</div></div></article>
+<article><h2>密集场景 · scene-0018</h2><p>转向及主要布局保留，工程车辆与标识细节有偏差。</p>
+<div class="comparison-scroll"><div class="comparison-row">
+<figure><figcaption>生成视频</figcaption><video controls muted playsinline preload="metadata" aria-label="生成视频" src="assets/02/generated.mp4"></video></figure>
+<figure><figcaption>原始真值</figcaption><video controls muted playsinline preload="metadata" aria-label="原始真值" src="assets/02/ground-truth.mp4"></video></figure>
+<figure><figcaption>BBox</figcaption><video controls muted playsinline preload="metadata" aria-label="BBox" src="assets/02/bbox.mp4"></video></figure>
+<figure><figcaption>六帧预览 <span class="preview-hint">点击放大 · 左生成 / 右真值</span></figcaption><a class="media-link" href="assets/02/preview.jpg" target="_blank" rel="noopener"><img class="preview-image" loading="lazy" src="assets/02/preview.jpg" alt="六个时间点的生成画面与原始真值对照"></a></figure>
+</div></div></article>
+<article><h2>雨天 · scene-0637</h2><p>湿路、雨滴和卡车经过较连贯，细小外观与真值不同。</p>
+<div class="comparison-scroll"><div class="comparison-row">
+<figure><figcaption>生成视频</figcaption><video controls muted playsinline preload="metadata" aria-label="生成视频" src="assets/03/generated.mp4"></video></figure>
+<figure><figcaption>原始真值</figcaption><video controls muted playsinline preload="metadata" aria-label="原始真值" src="assets/03/ground-truth.mp4"></video></figure>
+<figure><figcaption>BBox</figcaption><video controls muted playsinline preload="metadata" aria-label="BBox" src="assets/03/bbox.mp4"></video></figure>
+<figure><figcaption>六帧预览 <span class="preview-hint">点击放大 · 左生成 / 右真值</span></figcaption><a class="media-link" href="assets/03/preview.jpg" target="_blank" rel="noopener"><img class="preview-image" loading="lazy" src="assets/03/preview.jpg" alt="六个时间点的生成画面与原始真值对照"></a></figure>
+</div></div></article>
+<article><h2>雨夜 · scene-1065</h2><p>明显彩色噪点及灯光变形；另有种子与 VAE 精度诊断。</p>
+<div class="comparison-scroll"><div class="comparison-row">
+<figure><figcaption>生成视频</figcaption><video controls muted playsinline preload="metadata" aria-label="生成视频" src="assets/04/generated.mp4"></video></figure>
+<figure><figcaption>原始真值</figcaption><video controls muted playsinline preload="metadata" aria-label="原始真值" src="assets/04/ground-truth.mp4"></video></figure>
+<figure><figcaption>BBox</figcaption><video controls muted playsinline preload="metadata" aria-label="BBox" src="assets/04/bbox.mp4"></video></figure>
+<figure><figcaption>六帧预览 <span class="preview-hint">点击放大 · 左生成 / 右真值</span></figcaption><a class="media-link" href="assets/04/preview.jpg" target="_blank" rel="noopener"><img class="preview-image" loading="lazy" src="assets/04/preview.jpg" alt="六个时间点的生成画面与原始真值对照"></a></figure>
+</div></div></article>
+<article><h2>停车 · scene-0017</h2><p>静态背景基本固定，停车响应清晰。</p>
+<div class="comparison-scroll"><div class="comparison-row">
+<figure><figcaption>生成视频</figcaption><video controls muted playsinline preload="metadata" aria-label="生成视频" src="assets/05/generated.mp4"></video></figure>
+<figure><figcaption>原始真值</figcaption><video controls muted playsinline preload="metadata" aria-label="原始真值" src="assets/05/ground-truth.mp4"></video></figure>
+<figure><figcaption>BBox</figcaption><video controls muted playsinline preload="metadata" aria-label="BBox" src="assets/05/bbox.mp4"></video></figure>
+<figure><figcaption>六帧预览 <span class="preview-hint">点击放大 · 左生成 / 右真值</span></figcaption><a class="media-link" href="assets/05/preview.jpg" target="_blank" rel="noopener"><img class="preview-image" loading="lazy" src="assets/05/preview.jpg" alt="六个时间点的生成画面与原始真值对照"></a></figure>
+</div></div></article>
+<article><h2>左移 · scene-0017</h2><p>方向响应明显，末段逼近路缘。预设约左移 1.91 m。</p>
+<div class="comparison-scroll"><div class="comparison-row">
+<figure><figcaption>生成视频</figcaption><video controls muted playsinline preload="metadata" aria-label="生成视频" src="assets/06/generated.mp4"></video></figure>
+<figure><figcaption>原始真值</figcaption><video controls muted playsinline preload="metadata" aria-label="原始真值" src="assets/06/ground-truth.mp4"></video></figure>
+<figure><figcaption>BBox</figcaption><video controls muted playsinline preload="metadata" aria-label="BBox" src="assets/06/bbox.mp4"></video></figure>
+<figure><figcaption>六帧预览 <span class="preview-hint">点击放大 · 左生成 / 右真值</span></figcaption><a class="media-link" href="assets/06/preview.jpg" target="_blank" rel="noopener"><img class="preview-image" loading="lazy" src="assets/06/preview.jpg" alt="六个时间点的生成画面与原始真值对照"></a></figure>
+</div></div></article>
+<article><h2>10 步 · scene-0017</h2><p>本例 10 步仍保留主要结构与运动，总耗时约为 50 步的 42.5%。</p>
+<div class="comparison-scroll"><div class="comparison-row">
+<figure><figcaption>生成视频</figcaption><video controls muted playsinline preload="metadata" aria-label="生成视频" src="assets/07/generated.mp4"></video></figure>
+<figure><figcaption>原始真值</figcaption><video controls muted playsinline preload="metadata" aria-label="原始真值" src="assets/07/ground-truth.mp4"></video></figure>
+<figure><figcaption>BBox</figcaption><video controls muted playsinline preload="metadata" aria-label="BBox" src="assets/07/bbox.mp4"></video></figure>
+<figure><figcaption>六帧预览 <span class="preview-hint">点击放大 · 左生成 / 右真值</span></figcaption><a class="media-link" href="assets/07/preview.jpg" target="_blank" rel="noopener"><img class="preview-image" loading="lazy" src="assets/07/preview.jpg" alt="六个时间点的生成画面与原始真值对照"></a></figure>
+</div></div></article>
+<article><h2>65 帧 · scene-0017</h2><p>后半段前进落后、路牌重现；运行成功，长时一致性不足。</p>
+<div class="comparison-scroll"><div class="comparison-row">
+<figure><figcaption>生成视频</figcaption><video controls muted playsinline preload="metadata" aria-label="生成视频" src="assets/08/generated.mp4"></video></figure>
+<figure><figcaption>原始真值</figcaption><video controls muted playsinline preload="metadata" aria-label="原始真值" src="assets/08/ground-truth.mp4"></video></figure>
+<figure><figcaption>BBox</figcaption><video controls muted playsinline preload="metadata" aria-label="BBox" src="assets/08/bbox.mp4"></video></figure>
+<figure><figcaption>六帧预览 <span class="preview-hint">点击放大 · 左生成 / 右真值</span></figcaption><a class="media-link" href="assets/08/preview.jpg" target="_blank" rel="noopener"><img class="preview-image" loading="lazy" src="assets/08/preview.jpg" alt="六个时间点的生成画面与原始真值对照"></a></figure>
+</div></div></article>
+<article><h2>雨夜复核 · seed 43</h2><p>更换随机种子后仍出现彩色噪点，雨夜失真在两个种子下均可见。</p>
+<div class="comparison-scroll"><div class="comparison-row">
+<figure><figcaption>生成视频</figcaption><video controls muted playsinline preload="metadata" aria-label="生成视频" src="assets/09/generated.mp4"></video></figure>
+<figure><figcaption>原始真值</figcaption><video controls muted playsinline preload="metadata" aria-label="原始真值" src="assets/09/ground-truth.mp4"></video></figure>
+<figure><figcaption>BBox</figcaption><video controls muted playsinline preload="metadata" aria-label="BBox" src="assets/09/bbox.mp4"></video></figure>
+<figure><figcaption>六帧预览 <span class="preview-hint">点击放大 · 左生成 / 右真值</span></figcaption><a class="media-link" href="assets/09/preview.jpg" target="_blank" rel="noopener"><img class="preview-image" loading="lazy" src="assets/09/preview.jpg" alt="六个时间点的生成画面与原始真值对照"></a></figure>
+</div></div></article>
+</main>
+<footer>
+<p>结果说明：停车和左移同时修改 Action 与 BBox，原始真值仍对应原轨迹。展示为少量场景的定性观察；10 步结果不代表普遍等同于 50 步，65 帧不是模型最大长度。</p>
+<p>模型：<a href="https://github.com/Yifever20002/CompoSIA">CompoSIA</a> · 场景数据：<a href="https://www.nuscenes.org/nuscenes">nuScenes</a></p>
+</footer>
+<script>
+document.querySelectorAll('.comparison-row').forEach(row => {
+  const videos = [...row.querySelectorAll('video')];
+  let leader = videos[0];
+  let playing = false;
+  const seekTargets = new WeakMap();
+  const status = document.createElement('p');
+  status.setAttribute('role', 'status');
+  status.hidden = true;
+  row.parentElement.after(status);
+
+  function align(source, tolerance = 0.04) {
+    for (const video of videos) {
+      if (video === source || video.readyState === 0) continue;
+      if (Math.abs(video.currentTime - source.currentTime) > tolerance) {
+        seekTargets.set(video, source.currentTime);
+        video.currentTime = source.currentTime;
+      }
+    }
+  }
+
+  function pauseTogether() {
+    playing = false;
+    for (const video of videos) video.pause();
+  }
+
+  function showError(error) {
+    if (error.name === 'AbortError' && !playing) return;
+    pauseTogether();
+    status.hidden = false;
+    status.textContent = '视频播放失败：' + error.message;
+    console.error(error);
+  }
+
+  for (const video of videos) {
+    video.addEventListener('play', () => {
+      if (playing) return;
+      playing = true;
+      leader = video;
+      status.hidden = true;
+      align(leader);
+      for (const peer of videos) {
+        if (peer !== video && peer.paused) peer.play().catch(showError);
+      }
+    });
+    video.addEventListener('pause', () => {
+      if (!playing) return;
+      pauseTogether();
+      align(video);
+    });
+    video.addEventListener('seeking', () => {
+      const target = seekTargets.get(video);
+      // Ignore seeks made by align; a user seek becomes the new reference.
+      if (target !== undefined && Math.abs(video.currentTime - target) < 0.05) return;
+      leader = video;
+      align(leader);
+    });
+    video.addEventListener('seeked', () => seekTargets.delete(video));
+    video.addEventListener('loadedmetadata', () => align(leader));
+    video.addEventListener('timeupdate', () => {
+      if (playing && video === leader && !video.seeking) align(leader, 0.10);
+    });
+    video.addEventListener('ratechange', () => {
+      for (const peer of videos) {
+        if (peer.playbackRate !== video.playbackRate) peer.playbackRate = video.playbackRate;
+      }
+    });
+    video.addEventListener('error', () => showError(new Error(
+      video.getAttribute('aria-label') + '加载失败，请检查视频链接。'
+    )));
+  }
+});
+</script>
+</body>
+</html>
