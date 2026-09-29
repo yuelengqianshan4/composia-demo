@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="HorizonDrive G0 step1600：同一 nuScenes 验证场景的五组条件生成，与真值、地图和边界框同步对照。">
+<title>HorizonDrive · G0 step1600 条件对照</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f5f6f8;color:#192331;font:16px/1.6 system-ui,sans-serif}main{max-width:2100px;margin:auto;padding:28px 28px 40px}a{color:#145bb5}h1{font-size:30px;line-height:1.3;margin:18px 0 10px}h2{font-size:17px;margin:0}p{margin:8px 0}.muted{color:#596779}.parameters{font-variant-numeric:tabular-nums}.panel{background:white;border:1px solid #dbe0e7;border-radius:10px;padding:20px;margin-top:20px}.conditions{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}button,select{font:inherit;border:1px solid #bac4d0;border-radius:6px;background:white;color:#192331;padding:7px 13px;cursor:pointer}button:disabled{opacity:.45;cursor:wait}button:hover,select:hover{border-color:#145bb5}button[aria-pressed="true"]{color:white;background:#145bb5;border-color:#145bb5}button:focus-visible,select:focus-visible{outline:3px solid #8cbaf4;outline-offset:3px}.badges{display:flex;gap:9px;flex-wrap:wrap;font-size:14px}.badge{border-radius:4px;padding:3px 9px;background:#edf5ff;color:#145bb5}.badge.off{background:#eef0f3;color:#667180}.badge.fixed{background:#eaf5ee;color:#266841}.comparison{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;margin-top:20px}figure{min-width:0;margin:0}figcaption{display:flex;gap:12px;align-items:center;justify-content:space-between;min-height:45px;margin-bottom:10px;font-weight:600}figcaption select{padding:5px 9px}figcaption button{font-size:14px;padding:5px 10px;font-weight:400}.screen{position:relative;background:#0c1118;border-radius:6px;overflow:hidden}video{display:block;width:100%;aspect-ratio:3/1;background:#0c1118}.view-labels{position:absolute;inset:0;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);pointer-events:none}.view-labels span{align-self:start;justify-self:start;background:#101820b3;color:#fff;font-size:clamp(9px,.75vw,13px);padding:2px 6px;margin:5px;border-radius:3px;line-height:1.3}.view-labels small{font-size:.8em;display:block}.screen:fullscreen{display:flex;align-items:center;justify-content:center;width:100vw;height:100vh;border-radius:0}.screen:fullscreen video{width:100%;max-height:100vh}.screen:fullscreen .view-labels{top:max(0px,calc((100vh - 100vw / 3) / 2));bottom:max(0px,calc((100vh - 100vw / 3) / 2))}.screen:fullscreen .view-labels span{font-size:16px}.timeline{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:15px;font-variant-numeric:tabular-nums}.phase{padding:3px 10px;border-radius:4px;background:#eaf5ee;color:#266841}.phase.future{background:#edf5ff;color:#145bb5}.status{color:#a13b20;margin:12px 0 0}.details{display:grid;grid-template-columns:2fr 1fr;gap:24px}.details p{overflow-wrap:anywhere}.action-values{font-variant-numeric:tabular-nums;font-size:18px}.small{font-size:14px}footer{color:#596779;font-size:14px;margin-top:20px}@media(max-width:1100px){.comparison{grid-template-columns:1fr}.view-labels span{font-size:12px}}@media(max-width:650px){main{padding:18px 12px 30px}h1{font-size:24px}.panel{padding:14px}.details{grid-template-columns:1fr;gap:16px}.view-labels span{font-size:9px;margin:3px;padding:1px 3px}.view-labels small{display:none}.parameters{font-size:14px}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<a href="../">← CompoSIA 演示首页</a>
+<h1>HorizonDrive · G0 step1600</h1>
+<p>同一 nuScenes 验证场景，比较全条件与四组单条件生成。<span id="scene" class="muted"></span></p>
+<p class="parameters">T11 + K40 · 12 fps · 20 steps · CFG 3 · seed 42</p>
+<p class="muted small">前 11 帧为输入历史，后 40 帧为生成结果。单条件仍保留历史图像与视角 ID。六视角：上排左前／前／右前，下排左后／后／右后。</p>
+</header>
+<section class="panel" aria-label="条件与视频对照">
+<h2>选择生成条件</h2>
+<p id="generation-progress">已完成：全条件、仅 Text。仅 Map / BBox / Action 正在生成，完成后补齐。</p>
+<div class="conditions" role="group" aria-label="生成条件">
+<button type="button" data-variant="all" aria-pressed="true">全条件</button>
+<button type="button" data-variant="text-only" aria-pressed="false">仅 Text</button>
+<button type="button" data-variant="map-only" disabled title="生成中" aria-pressed="false">仅 Map</button>
+<button type="button" data-variant="bbox-only" disabled title="生成中" aria-pressed="false">仅 BBox</button>
+<button type="button" data-variant="action-only" disabled title="生成中" aria-pressed="false">仅 Action</button>
+</div>
+<div class="badges" aria-label="条件启用状态" aria-live="polite">
+<span class="badge fixed">历史图像 · 始终保留</span><span class="badge fixed">视角 ID · 始终保留</span>
+<span class="badge" data-condition="text">Text · 启用</span><span class="badge" data-condition="map">Map · 启用</span><span class="badge" data-condition="bbox">BBox · 启用</span><span class="badge" data-condition="action">Action · 启用</span>
+</div>
+<div class="comparison">
+<figure>
+<figcaption><span id="generated-title">生成 · 全条件</span><button type="button" data-fullscreen="generated-screen">全屏</button></figcaption>
+<div class="screen" id="generated-screen"><video id="generated" src="assets/all.mp4" controls muted playsinline preload="metadata" aria-label="生成视频"></video><div class="view-labels" aria-hidden="true"></div></div>
+</figure>
+<figure>
+<figcaption><label>同步参考 <select id="reference-select" aria-label="同步参考视频"><option value="gt">GT · 原始真值</option><option value="map">Map · 地图</option><option value="bbox">BBox · 边界框</option></select></label><button type="button" data-fullscreen="reference-screen">全屏</button></figcaption>
+<div class="screen" id="reference-screen"><video id="reference" src="assets/gt.mp4" controls muted playsinline preload="metadata" aria-label="同步参考视频"></video><div class="view-labels" aria-hidden="true"></div></div>
+</figure>
+</div>
+<div class="timeline"><strong id="frame">第 1 / 51 帧</strong><span id="phase" class="phase">输入历史 · 1 / 11</span><span id="elapsed" class="muted">0.00 s</span></div>
+<p class="muted small">任一视频均可控制同步播放、暂停与拖动；切换条件或参考保留当前位置。全屏按钮保留视角标识。Map / BBox 为实际条件缓存的 VAE 解码预览。</p>
+<p id="playback-status" class="status" role="status" hidden></p>
+</section>
+<section class="panel details" aria-label="当前条件内容">
+<div><h2>场景文本 <span id="text-state" class="muted small">· 当前启用</span></h2><p id="text-content">正在读取场景文本…</p></div>
+<div><h2>当前帧 Action <span id="action-state" class="muted small">· 当前启用</span></h2><p id="action-content" class="action-values">—</p><p id="action-description" class="muted small">dx、dy 为位移（米），dyaw 为偏航角变化（度）。</p></div>
+</section>
+<p id="metadata-status" class="status" role="status" hidden></p>
+<footer>同一场景与随机种子下的定性对照。切换参考只改变右侧展示，不改变生成条件。数据：<a href="https://www.nuscenes.org/nuscenes">nuScenes</a>。</footer>
+</main>
+<script>
+'use strict';
+const FPS = 12, HISTORY = 11, TOTAL = 51;
+const generated = document.querySelector('#generated');
+const reference = document.querySelector('#reference');
+const videos = [generated, reference];
+const status = document.querySelector('#playback-status');
+const names = {all: '全条件', 'text-only': '仅 Text', 'map-only': '仅 Map', 'bbox-only': '仅 BBox', 'action-only': '仅 Action'};
+const cameraNames = ['左前', '前', '右前', '左后', '后', '右后'];
+const cameras = ['CAM_FRONT_LEFT', 'CAM_FRONT', 'CAM_FRONT_RIGHT', 'CAM_BACK_LEFT', 'CAM_BACK', 'CAM_BACK_RIGHT'];
+let metadata = null, variant = 'all', leader = generated, playing = false, holding = false;
+const seekTargets = new WeakMap(), pausedBySync = new WeakSet(), playedBySync = new WeakSet();
+const replacements = new Map();
+function currentTime() { return replacements.get(leader) ?? leader.currentTime; }
+function showCameras(order) {
+  document.querySelectorAll('.view-labels').forEach(container => {
+    container.replaceChildren(...order.map((camera, index) => {
+      const label = document.createElement('span');
+      label.append(cameraNames[index]);
+      const id = document.createElement('small');
+      id.textContent = camera;
+      label.append(id);
+      return label;
+    }));
+  });
+}
+showCameras(cameras);
+function enabled(condition) { return variant === 'all' || variant === condition + '-only'; }
+function frameIndex(time) { return Math.min(TOTAL - 1, Math.max(0, Math.floor(time * FPS + 0.0001))); }
+function renderFrame() {
+  const index = frameIndex(currentTime());
+  document.querySelector('#frame').textContent = `第 ${index + 1} / ${TOTAL} 帧`;
+  const phase = document.querySelector('#phase');
+  phase.textContent = index < HISTORY ? `输入历史 · ${index + 1} / ${HISTORY}` : `未来生成 · ${index - HISTORY + 1} / ${TOTAL - HISTORY}`;
+  phase.classList.toggle('future', index >= HISTORY);
+  document.querySelector('#elapsed').textContent = `${(index / FPS).toFixed(2)} s`;
+  const action = metadata?.actions[index];
+  document.querySelector('#action-content').textContent = action ? `dx ${action.dx.toFixed(3)} m · dy ${action.dy.toFixed(3)} m · dyaw ${action.dyaw_deg.toFixed(3)}°` : '此帧无 Action 数据';
+}
+function align(source, tolerance = 0.04) {
+  for (const video of videos) {
+    if (video === source || video.readyState === 0 || replacements.has(video)) continue;
+    if (Math.abs(video.currentTime - source.currentTime) > tolerance) {
+      seekTargets.set(video, source.currentTime);
+      video.currentTime = source.currentTime;
+    }
+  }
+}
+function pauseVideos() {
+  for (const video of videos) {
+    if (!video.paused) { pausedBySync.add(video); video.pause(); }
+  }
+}
+function hold() {
+  holding = true;
+  pauseVideos();
+  status.hidden = false;
+  status.textContent = '正在加载两段视频，就绪后同步播放…';
+}
+function showError(error) {
+  if (error.name === 'AbortError' && (holding || !playing)) return;
+  playing = false;
+  holding = false;
+  pauseVideos();
+  status.hidden = false;
+  status.textContent = '视频播放失败：' + error.message;
+  console.error(error);
+}
+function resumeWhenReady() {
+  if (!playing || replacements.size) return;
+  align(leader);
+  if (videos.some(video => video.readyState < 3 || video.seeking)) { hold(); return; }
+  holding = false;
+  status.hidden = true;
+  for (const video of videos) {
+    if (video.paused) { playedBySync.add(video); video.play().catch(showError); }
+  }
+}
+function switchSource(video, src) {
+  const time = currentTime();
+  pauseVideos();
+  leader = videos.find(peer => peer !== video);
+  replacements.set(video, time);
+  status.hidden = false;
+  status.textContent = '正在切换视频…';
+  video.src = src;
+  video.preload = 'auto';
+  video.load();
+
+}
+for (const video of videos) {
+  video.addEventListener('play', () => {
+    if (playedBySync.delete(video)) return;
+    playing = true;
+    leader = video;
+    for (const peer of videos) peer.preload = 'auto';
+    resumeWhenReady();
+  });
+  video.addEventListener('pause', () => {
+    if (pausedBySync.delete(video) || !playing) return;
+    playing = false;
+    holding = false;
+    pauseVideos();
+    align(video);
+    status.hidden = true;
+  });
+  video.addEventListener('seeking', () => {
+    const target = seekTargets.get(video);
+    if (target !== undefined && Math.abs(video.currentTime - target) < 0.05) return;
+    leader = video;
+    align(leader);
+    renderFrame();
+    resumeWhenReady();
+  });
+  video.addEventListener('seeked', () => { seekTargets.delete(video); renderFrame(); resumeWhenReady(); });
+  video.addEventListener('loadedmetadata', () => {
+    if (!replacements.has(video)) { align(leader); return; }
+    const time = replacements.get(video);
+    replacements.delete(video);
+    seekTargets.set(video, time);
+    video.currentTime = time;
+    if (!replacements.size) status.hidden = true;
+    renderFrame();
+    resumeWhenReady();
+  });
+  video.addEventListener('canplay', resumeWhenReady);
+  video.addEventListener('waiting', () => { if (playing && !replacements.size) { hold(); align(leader); } });
+  video.addEventListener('timeupdate', () => {
+    if (playing && !holding && video === leader && !video.seeking) align(leader, 0.10);
+    renderFrame();
+  });
+  video.addEventListener('ratechange', () => {
+    for (const peer of videos) if (peer.playbackRate !== video.playbackRate) peer.playbackRate = video.playbackRate;
+  });
+  video.addEventListener('error', () => showError(new Error(video.getAttribute('aria-label') + '加载失败，请检查视频链接。')));
+}
+document.querySelectorAll('[data-variant]').forEach(button => button.addEventListener('click', () => {
+  if (variant === button.dataset.variant) return;
+  variant = button.dataset.variant;
+  document.querySelectorAll('[data-variant]').forEach(peer => peer.setAttribute('aria-pressed', String(peer === button)));
+  document.querySelectorAll('[data-condition]').forEach(badge => {
+    const active = enabled(badge.dataset.condition);
+    badge.classList.toggle('off', !active);
+    const label = {text:'Text',map:'Map',bbox:'BBox',action:'Action'}[badge.dataset.condition];
+    badge.textContent = `${label} · ${active ? '启用' : '关闭'}`;
+  });
+  for (const condition of ['text', 'action']) document.querySelector(`#${condition}-state`).textContent = enabled(condition) ? '· 当前启用' : '· 当前关闭，仅供参考';
+  document.querySelector('#generated-title').textContent = '生成 · ' + names[variant];
+  switchSource(generated, `assets/${variant}.mp4`);
+}));
+document.querySelector('#reference-select').addEventListener('change', event => switchSource(reference, `assets/${event.target.value}.mp4`));
+document.querySelectorAll('[data-fullscreen]').forEach(button => button.addEventListener('click', async () => {
+  try { await document.getElementById(button.dataset.fullscreen).requestFullscreen(); }
+  catch (error) { status.hidden = false; status.textContent = '无法进入全屏：' + error.message; }
+}));
+fetch('metadata.json').then(response => {
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  return response.json();
+}).then(data => {
+  metadata = data;
+  document.querySelector('#scene').textContent = data.scene_name;
+  document.querySelector('#text-content').textContent = data.text;
+  showCameras(data.camera_order);
+  renderFrame();
+}).catch(error => {
+  const metadataStatus = document.querySelector('#metadata-status');
+  metadataStatus.hidden = false;
+  metadataStatus.textContent = '场景信息读取失败：' + error.message;
+  document.querySelector('#text-content').textContent = '场景文本未加载';
+  console.error(error);
+});
+function tick() { if (playing) renderFrame(); requestAnimationFrame(tick); }
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>
