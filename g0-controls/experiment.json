@@ -1,0 +1,188 @@
+{
+  "checkpoint": "G0 mixed-length training, step 100",
+  "condition_order": [
+    "text",
+    "hdmap",
+    "bbox",
+    "action"
+  ],
+  "resolution": [
+    256,
+    512
+  ],
+  "source_fps": 12,
+  "display_fps": 24,
+  "display_seconds": 4.25,
+  "samples": [
+    {
+      "split": "train",
+      "sample_id": "train-003",
+      "condition": "text-only",
+      "condition_mask": [
+        true,
+        false,
+        false,
+        false
+      ],
+      "seed": 42,
+      "guidance_scale": 3.0,
+      "num_inference_steps": 20,
+      "context_frames": 11,
+      "future_frames": 40,
+      "video": "assets/train/text-only.mp4"
+    },
+    {
+      "split": "train",
+      "sample_id": "train-003",
+      "condition": "map-only",
+      "condition_mask": [
+        false,
+        true,
+        false,
+        false
+      ],
+      "seed": 42,
+      "guidance_scale": 3.0,
+      "num_inference_steps": 20,
+      "context_frames": 11,
+      "future_frames": 40,
+      "video": "assets/train/map-only.mp4"
+    },
+    {
+      "split": "train",
+      "sample_id": "train-003",
+      "condition": "bbox-only",
+      "condition_mask": [
+        false,
+        false,
+        true,
+        false
+      ],
+      "seed": 42,
+      "guidance_scale": 3.0,
+      "num_inference_steps": 20,
+      "context_frames": 11,
+      "future_frames": 40,
+      "video": "assets/train/bbox-only.mp4"
+    },
+    {
+      "split": "train",
+      "sample_id": "train-003",
+      "condition": "action-only",
+      "condition_mask": [
+        false,
+        false,
+        false,
+        true
+      ],
+      "seed": 42,
+      "guidance_scale": 3.0,
+      "num_inference_steps": 20,
+      "context_frames": 11,
+      "future_frames": 40,
+      "video": "assets/train/action-only.mp4"
+    },
+    {
+      "split": "train",
+      "sample_id": "train-003",
+      "condition": "none",
+      "condition_mask": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "seed": 42,
+      "guidance_scale": 3.0,
+      "num_inference_steps": 20,
+      "context_frames": 11,
+      "future_frames": 40,
+      "video": "assets/train/none.mp4"
+    },
+    {
+      "split": "validation",
+      "sample_id": "validation-scene-133-start-000",
+      "condition": "text-only",
+      "condition_mask": [
+        true,
+        false,
+        false,
+        false
+      ],
+      "seed": 42,
+      "guidance_scale": 3.0,
+      "num_inference_steps": 20,
+      "context_frames": 11,
+      "future_frames": 40,
+      "video": "assets/validation/text-only.mp4"
+    },
+    {
+      "split": "validation",
+      "sample_id": "validation-scene-133-start-000",
+      "condition": "map-only",
+      "condition_mask": [
+        false,
+        true,
+        false,
+        false
+      ],
+      "seed": 42,
+      "guidance_scale": 3.0,
+      "num_inference_steps": 20,
+      "context_frames": 11,
+      "future_frames": 40,
+      "video": "assets/validation/map-only.mp4"
+    },
+    {
+      "split": "validation",
+      "sample_id": "validation-scene-133-start-000",
+      "condition": "bbox-only",
+      "condition_mask": [
+        false,
+        false,
+        true,
+        false
+      ],
+      "seed": 42,
+      "guidance_scale": 3.0,
+      "num_inference_steps": 20,
+      "context_frames": 11,
+      "future_frames": 40,
+      "video": "assets/validation/bbox-only.mp4"
+    },
+    {
+      "split": "validation",
+      "sample_id": "validation-scene-133-start-000",
+      "condition": "action-only",
+      "condition_mask": [
+        false,
+        false,
+        false,
+        true
+      ],
+      "seed": 42,
+      "guidance_scale": 3.0,
+      "num_inference_steps": 20,
+      "context_frames": 11,
+      "future_frames": 40,
+      "video": "assets/validation/action-only.mp4"
+    },
+    {
+      "split": "validation",
+      "sample_id": "validation-scene-133-start-000",
+      "condition": "none",
+      "condition_mask": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "seed": 42,
+      "guidance_scale": 3.0,
+      "num_inference_steps": 20,
+      "context_frames": 11,
+      "future_frames": 40,
+      "video": "assets/validation/none.mp4"
+    }
+  ]
+}
