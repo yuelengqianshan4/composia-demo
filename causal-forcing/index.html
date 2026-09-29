@@ -1,0 +1,543 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="G0-100到Causal Forcing的双PPU短测报告：TF、ODE、DMD训练与六视角GT、Map、BBox同步对照。">
+<title>G0 → Causal Forcing · 双卡短测报告</title><style>
+*{box-sizing:border-box}
+body{font:16px/1.6 system-ui,sans-serif;margin:28px auto;padding:0 24px;max-width:2000px;background:#f5f6f8;color:#192331}
+h1{margin-bottom:8px}h2{font-size:21px;margin:0 0 8px}p{margin:10px 0}
+main{display:grid;grid-template-columns:minmax(0,1fr);gap:24px}
+article{min-width:0;background:white;padding:20px;border:1px solid #dbe0e7;border-radius:8px;margin-bottom:24px}
+main article{margin-bottom:0}
+main+article{margin-top:24px}
+.comparison-scroll{overflow-x:auto;margin:18px 0 12px;padding-bottom:8px}
+.comparison-row{display:grid;grid-template-columns:repeat(4,minmax(260px,1fr));gap:16px;align-items:start}
+figure{min-width:0;margin:0}
+figcaption{font-weight:600;margin:0 0 10px}
+video{display:block;width:100%;aspect-ratio:2/1;background:#111;border-radius:4px}
+.preview-image{display:block;width:100%;height:auto;border:1px solid #dbe0e7;border-radius:4px}
+a{color:#145bb5}a:hover{text-decoration:underline}
+.media-link{display:block}.preview-hint{font-size:13px;font-weight:400;color:#596779}
+@media(max-width:700px){body{padding:0 12px}article{padding:14px}}
+
+footer{font-size:14px;color:#596779;margin:24px 0}header{margin-bottom:24px}
+
+body{max-width:1720px}nav{display:flex;gap:16px;flex-wrap:wrap;margin:16px 0}
+.comparison-row{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.comparison-row figure:first-child{grid-column:1/-1}video{aspect-ratio:auto;width:100%;height:auto}
+.download{font-size:13px}.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:20px 0}
+.summary div{background:white;padding:16px;border:1px solid #dbe0e7;border-radius:8px}.summary strong{display:block;font-size:24px}
+details{background:white;padding:20px;border:1px solid #dbe0e7;border-radius:8px;margin-top:24px}summary{cursor:pointer;font-weight:700;font-size:20px}
+.record{overflow-x:auto}.record img{max-width:100%;height:auto}.record h1{font-size:24px}.record h2{margin-top:28px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0}th,td{border:1px solid #dbe0e7;padding:9px;text-align:left}th{background:#eef2f6}
+.note{color:#596779}a{overflow-wrap:anywhere}
+@media(max-width:700px){.comparison-row{grid-template-columns:1fr}.summary{grid-template-columns:repeat(2,1fr)}}
+</style></head><body>
+<header><nav><a href="../">CompoSIA展示首页</a><a href="https://github.com/yuelengqianshan4/composia-demo/blob/main/causal-forcing/REPORT.md">完整Markdown报告</a><a href="https://wandb.ai/yuelengqianshan4-wuhan-university/horizondrive-reproduction/reports/G0-→-TF-→-ODE-→-DMD：六视角阶段对照--VmlldzoxODAyNDc1MA==">W&amp;B报告</a></nav>
+<h1>G0-100 → Causal Forcing</h1><p>50个训练场景 · DSW双PPU · 六视角短测</p>
+<div class="summary"><div><strong>TF 25</strong>因果教师更新</div><div><strong>50条</strong>48步教师轨迹</div><div><strong>ODE 25</strong>四步初始化更新</div><div><strong>DMD 25 outer</strong>学生5次 / fake25次</div></div>
+<p>已完成双卡训练、权重保存、outer10断点恢复与四阶段推理。每阶段推理两条验证样本，本页统一展示scene-063、起始帧0、seed=42。</p>
+<p>每组点击任意视频，同步播放、暂停和拖动三种对照。六视角上排：左前、前、右前；下排：左后、后、右后。可全屏查看细节。</p>
+<p class="note">源视频51帧，前11帧为历史、后40帧为生成；展示12.125秒、24 fps。阶段、源帧及历史／生成标记已标在视频中。</p>
+<nav><a href="#g0">G0基准</a><a href="#tf">TF教师</a><a href="#ode">ODE初始化</a><a href="#dmd">DMD蒸馏</a><a href="#record">实验记录</a></nav></header>
+<main><article id="g0"><h2>G0 · 100次更新</h2><p><strong>蒸馏前基准</strong> · 48步 Euler · CFG 6</p><p>观察原始G0的场景结构、运动和六视角一致性。</p><div class="comparison-scroll"><div class="comparison-row"><figure><figcaption>生成＋GT（左生成 / 右GT）</figcaption><video controls muted playsinline preload="none" aria-label="G0 · 100次更新 生成＋GT（左生成 / 右GT）" poster="assets/g0-preview.jpg" src="videos/g0/gt-comparison.mp4"></video><a class="download" href="videos/g0/gt-comparison.mp4" download>下载视频</a></figure><figure><figcaption>生成＋HD Map Overlay</figcaption><video controls muted playsinline preload="none" aria-label="G0 · 100次更新 生成＋HD Map Overlay" src="videos/g0/map-overlay.mp4"></video><a class="download" href="videos/g0/map-overlay.mp4" download>下载视频</a></figure><figure><figcaption>生成＋BBox Overlay</figcaption><video controls muted playsinline preload="none" aria-label="G0 · 100次更新 生成＋BBox Overlay" src="videos/g0/bbox-overlay.mp4"></video><a class="download" href="videos/g0/bbox-overlay.mp4" download>下载视频</a></figure></div></div></article><article id="tf"><h2>TF · 25次更新</h2><p><strong>因果教师训练</strong> · 48步 Euler · CFG 6</p><p>观察因果化及真实历史条件训练后的生成效果。</p><div class="comparison-scroll"><div class="comparison-row"><figure><figcaption>生成＋GT（左生成 / 右GT）</figcaption><video controls muted playsinline preload="none" aria-label="TF · 25次更新 生成＋GT（左生成 / 右GT）" poster="assets/tf-preview.jpg" src="videos/tf/gt-comparison.mp4"></video><a class="download" href="videos/tf/gt-comparison.mp4" download>下载视频</a></figure><figure><figcaption>生成＋HD Map Overlay</figcaption><video controls muted playsinline preload="none" aria-label="TF · 25次更新 生成＋HD Map Overlay" src="videos/tf/map-overlay.mp4"></video><a class="download" href="videos/tf/map-overlay.mp4" download>下载视频</a></figure><figure><figcaption>生成＋BBox Overlay</figcaption><video controls muted playsinline preload="none" aria-label="TF · 25次更新 生成＋BBox Overlay" src="videos/tf/bbox-overlay.mp4"></video><a class="download" href="videos/tf/bbox-overlay.mp4" download>下载视频</a></figure></div></div></article><article id="ode"><h2>ODE · 25次更新</h2><p><strong>四步初始化</strong> · 4步 CM · CFG 1</p><p>观察从多步教师轨迹学习到的四步生成效果。</p><div class="comparison-scroll"><div class="comparison-row"><figure><figcaption>生成＋GT（左生成 / 右GT）</figcaption><video controls muted playsinline preload="none" aria-label="ODE · 25次更新 生成＋GT（左生成 / 右GT）" poster="assets/ode-preview.jpg" src="videos/ode/gt-comparison.mp4"></video><a class="download" href="videos/ode/gt-comparison.mp4" download>下载视频</a></figure><figure><figcaption>生成＋HD Map Overlay</figcaption><video controls muted playsinline preload="none" aria-label="ODE · 25次更新 生成＋HD Map Overlay" src="videos/ode/map-overlay.mp4"></video><a class="download" href="videos/ode/map-overlay.mp4" download>下载视频</a></figure><figure><figcaption>生成＋BBox Overlay</figcaption><video controls muted playsinline preload="none" aria-label="ODE · 25次更新 生成＋BBox Overlay" src="videos/ode/bbox-overlay.mp4"></video><a class="download" href="videos/ode/bbox-overlay.mp4" download>下载视频</a></figure></div></div></article><article id="dmd"><h2>DMD · 25 outer</h2><p><strong>学生5次 / fake 25次更新</strong> · 4步 CM · CFG 1</p><p>观察自回归蒸馏后的生成效果与Map、BBox控制一致性。</p><div class="comparison-scroll"><div class="comparison-row"><figure><figcaption>生成＋GT（左生成 / 右GT）</figcaption><video controls muted playsinline preload="none" aria-label="DMD · 25 outer 生成＋GT（左生成 / 右GT）" poster="assets/dmd-preview.jpg" src="videos/dmd/gt-comparison.mp4"></video><a class="download" href="videos/dmd/gt-comparison.mp4" download>下载视频</a></figure><figure><figcaption>生成＋HD Map Overlay</figcaption><video controls muted playsinline preload="none" aria-label="DMD · 25 outer 生成＋HD Map Overlay" src="videos/dmd/map-overlay.mp4"></video><a class="download" href="videos/dmd/map-overlay.mp4" download>下载视频</a></figure><figure><figcaption>生成＋BBox Overlay</figcaption><video controls muted playsinline preload="none" aria-label="DMD · 25 outer 生成＋BBox Overlay" src="videos/dmd/bbox-overlay.mp4"></video><a class="download" href="videos/dmd/bbox-overlay.mp4" download>下载视频</a></figure></div></div></article></main>
+<details id="record"><summary>完整实验记录：配置、耗时、显存与结果说明</summary><div class="record"><h1>G0-100 → Causal Forcing 双卡短测</h1>
+<p>已完成 TF25 → 50 条教师轨迹 → ODE25 → DMD25 outer，以及四阶段保存权重的两条验证推理、十二个 val0 对照视频。DMD 在 outer 10 保存后恢复，累计 5 次 student、25 次 fake 更新。</p>
+<p><a href="https://wandb.ai/yuelengqianshan4-wuhan-university/horizondrive-reproduction/reports/G0-→-TF-→-ODE-→-DMD：六视角阶段对照--VmlldzoxODAyNDc1MA==">W&amp;B 四阶段视频 Report</a></p>
+<h2>训练与恢复</h2>
+<table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>每 rank 更新数</th>
+<th>数据覆盖</th>
+<th>末次 loss（rank 0 / 1）</th>
+<th>实际 W&amp;B run</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TF</td>
+<td>25 main</td>
+<td>50 条、无重复</td>
+<td>0.100485 / 0.0917928</td>
+<td><a href="https://wandb.ai/yuelengqianshan4-wuhan-university/horizondrive-reproduction/runs/hdcf50tf25r02">hd-g0s100-cf-n50_tf25-ppu2_b1-r02</a>；cf,smoke,train</td>
+</tr>
+<tr>
+<td>ODE</td>
+<td>25 main</td>
+<td>50 条、无重复</td>
+<td>0.0475862 / 0.0674774</td>
+<td><a href="https://wandb.ai/yuelengqianshan4-wuhan-university/horizondrive-reproduction/runs/hdcf50ode25r02">hd-g0s100_tf25-cf-n50_ode25-ppu2_b1-r02</a>；cf,init,smoke</td>
+</tr>
+<tr>
+<td>DMD</td>
+<td>5 student / 25 fake</td>
+<td>50 条、无重复</td>
+<td>student 0.344949 / 0.525144；fake 0.049621 / 0.0389252</td>
+<td><a href="https://wandb.ai/yuelengqianshan4-wuhan-university/horizondrive-reproduction/runs/hdcf50dmd25r02">hd-g0s100_tf25_ode25-cf-n50_oi25-ppu2_b1-r02</a>；cf,distill,smoke</td>
+</tr>
+</tbody>
+</table>
+<p>各阶段两 rank 均记录 FSDP2/DTensor；更新编号完整覆盖 1–25，指标均有限，逐步全局梯度范数一致。DMD 两 rank 均从 step=10、batch_in_epoch=10 恢复，结束时 epoch=1、batch_in_epoch=0。</p>
+<p>实际权重变化在 CPU 上仅读取 <code>head.head.weight</code> 核对；源、目标张量均有限。</p>
+<table>
+<thead>
+<tr>
+<th>阶段转换</th>
+<th style="text-align: right;">变化元素 / 总元素</th>
+<th style="text-align: right;">最大绝对差</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>G0 → TF</td>
+<td style="text-align: right;">98,302 / 98,304</td>
+<td style="text-align: right;">5.09527e-05</td>
+</tr>
+<tr>
+<td>TF → ODE</td>
+<td style="text-align: right;">98,301 / 98,304</td>
+<td style="text-align: right;">5.03212e-05</td>
+</tr>
+<tr>
+<td>ODE → DMD</td>
+<td style="text-align: right;">98,300 / 98,304</td>
+<td style="text-align: right;">1.55019e-05</td>
+</tr>
+</tbody>
+</table>
+<p><img loading="lazy" alt="TF 原始训练指标" src="assets/tf-training.png" /></p>
+<h2>耗时与显存</h2>
+<p>组件统计取 rank 0 原始记录，单位秒；DMD student 组件只计入 optimizer 计数实际增加的 5 个 outer。update包含组件耗时；各组件的中位数不能直接相加作为端到端时间。</p>
+<table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>组件</th>
+<th style="text-align: right;">次数</th>
+<th style="text-align: right;">累计秒</th>
+<th style="text-align: right;">中位秒</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TF</td>
+<td>data</td>
+<td style="text-align: right;">25</td>
+<td style="text-align: right;">0.995</td>
+<td style="text-align: right;">0.000</td>
+</tr>
+<tr>
+<td>TF</td>
+<td>update</td>
+<td style="text-align: right;">25</td>
+<td style="text-align: right;">5328.808</td>
+<td style="text-align: right;">212.406</td>
+</tr>
+<tr>
+<td>TF</td>
+<td>forward</td>
+<td style="text-align: right;">25</td>
+<td style="text-align: right;">1108.103</td>
+<td style="text-align: right;">44.204</td>
+</tr>
+<tr>
+<td>TF</td>
+<td>backward</td>
+<td style="text-align: right;">25</td>
+<td style="text-align: right;">4197.427</td>
+<td style="text-align: right;">167.853</td>
+</tr>
+<tr>
+<td>TF</td>
+<td>optimizer</td>
+<td style="text-align: right;">25</td>
+<td style="text-align: right;">2.923</td>
+<td style="text-align: right;">0.043</td>
+</tr>
+<tr>
+<td>ODE</td>
+<td>data</td>
+<td style="text-align: right;">25</td>
+<td style="text-align: right;">1.071</td>
+<td style="text-align: right;">0.000</td>
+</tr>
+<tr>
+<td>ODE</td>
+<td>update</td>
+<td style="text-align: right;">25</td>
+<td style="text-align: right;">5283.256</td>
+<td style="text-align: right;">210.504</td>
+</tr>
+<tr>
+<td>ODE</td>
+<td>forward</td>
+<td style="text-align: right;">25</td>
+<td style="text-align: right;">1094.266</td>
+<td style="text-align: right;">43.640</td>
+</tr>
+<tr>
+<td>ODE</td>
+<td>backward</td>
+<td style="text-align: right;">25</td>
+<td style="text-align: right;">4168.508</td>
+<td style="text-align: right;">166.702</td>
+</tr>
+<tr>
+<td>ODE</td>
+<td>optimizer</td>
+<td style="text-align: right;">25</td>
+<td style="text-align: right;">2.952</td>
+<td style="text-align: right;">0.043</td>
+</tr>
+<tr>
+<td>DMD</td>
+<td>data</td>
+<td style="text-align: right;">25</td>
+<td style="text-align: right;">9.049</td>
+<td style="text-align: right;">0.000</td>
+</tr>
+<tr>
+<td>DMD</td>
+<td>update</td>
+<td style="text-align: right;">25</td>
+<td style="text-align: right;">9488.306</td>
+<td style="text-align: right;">331.750</td>
+</tr>
+<tr>
+<td>DMD</td>
+<td>generator_forward</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">384.822</td>
+<td style="text-align: right;">64.058</td>
+</tr>
+<tr>
+<td>DMD</td>
+<td>generator_scores</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">741.074</td>
+<td style="text-align: right;">148.224</td>
+</tr>
+<tr>
+<td>DMD</td>
+<td>generator_backward</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">359.187</td>
+<td style="text-align: right;">71.393</td>
+</tr>
+<tr>
+<td>DMD</td>
+<td>generator_optimizer</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">1.951</td>
+<td style="text-align: right;">0.052</td>
+</tr>
+<tr>
+<td>DMD</td>
+<td>critic_rollout</td>
+<td style="text-align: right;">25</td>
+<td style="text-align: right;">1827.713</td>
+<td style="text-align: right;">79.124</td>
+</tr>
+<tr>
+<td>DMD</td>
+<td>critic_forward</td>
+<td style="text-align: right;">25</td>
+<td style="text-align: right;">1235.666</td>
+<td style="text-align: right;">49.409</td>
+</tr>
+<tr>
+<td>DMD</td>
+<td>critic_backward</td>
+<td style="text-align: right;">25</td>
+<td style="text-align: right;">4858.030</td>
+<td style="text-align: right;">194.317</td>
+</tr>
+<tr>
+<td>DMD</td>
+<td>critic_optimizer</td>
+<td style="text-align: right;">25</td>
+<td style="text-align: right;">1.302</td>
+<td style="text-align: right;">0.048</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>阶段</th>
+<th style="text-align: right;">命令耗时秒</th>
+<th style="text-align: right;">checkpoint 调用累计秒（rank 0）</th>
+<th style="text-align: right;">CPU 导出秒</th>
+<th>峰值 allocated GiB（r0/r1）</th>
+<th>峰值 reserved GiB（r0/r1）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TF</td>
+<td style="text-align: right;">未单独记录</td>
+<td style="text-align: right;">未记录</td>
+<td style="text-align: right;">15.359</td>
+<td>82.315 / 82.313</td>
+<td>92.676 / 92.674</td>
+</tr>
+<tr>
+<td>ODE</td>
+<td style="text-align: right;">5349.719</td>
+<td style="text-align: right;">13.802</td>
+<td style="text-align: right;">20.122</td>
+<td>82.236 / 82.234</td>
+<td>92.598 / 92.594</td>
+</tr>
+<tr>
+<td>DMD</td>
+<td style="text-align: right;">9748.357</td>
+<td style="text-align: right;">110.736</td>
+<td style="text-align: right;">19.767</td>
+<td>74.725 / 74.721</td>
+<td>93.188 / 93.184</td>
+</tr>
+</tbody>
+</table>
+<p>50 条轨迹生成总耗时 <strong>106142.992 秒</strong>，两 rank 各写入 25 条；48 步 Euler、shift=5、CFG=6。每条轨迹保存四个中间状态、教师端点及对应GT。</p>
+<h2>保存权重推理</h2>
+<p>四阶段各两个验证样本均记录 finite=true、history_exact=true；展示固定验证样本 val0（scene-063，起始帧0）。</p>
+<table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>采样</th>
+<th>两 rank 推理秒</th>
+<th style="text-align: right;">解码秒</th>
+<th style="text-align: right;">渲染秒</th>
+<th style="text-align: right;">命令总秒</th>
+<th>视频</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>G0</td>
+<td>EULER 48 / CFG 6</td>
+<td>4744.305 / 4746.473</td>
+<td style="text-align: right;">14.418</td>
+<td style="text-align: right;">17.986</td>
+<td style="text-align: right;">4816.290</td>
+<td><a href="videos/g0/gt-comparison.mp4">GT</a> · <a href="videos/g0/map-overlay.mp4">MAP</a> · <a href="videos/g0/bbox-overlay.mp4">BBOX</a></td>
+</tr>
+<tr>
+<td>TF</td>
+<td>EULER 48 / CFG 6</td>
+<td>1867.502 / 1869.226</td>
+<td style="text-align: right;">14.212</td>
+<td style="text-align: right;">17.620</td>
+<td style="text-align: right;">1934.889</td>
+<td><a href="videos/tf/gt-comparison.mp4">GT</a> · <a href="videos/tf/map-overlay.mp4">MAP</a> · <a href="videos/tf/bbox-overlay.mp4">BBOX</a></td>
+</tr>
+<tr>
+<td>ODE</td>
+<td>CM 4 / CFG 1</td>
+<td>100.470 / 102.342</td>
+<td style="text-align: right;">12.529</td>
+<td style="text-align: right;">18.878</td>
+<td style="text-align: right;">169.069</td>
+<td><a href="videos/ode/gt-comparison.mp4">GT</a> · <a href="videos/ode/map-overlay.mp4">MAP</a> · <a href="videos/ode/bbox-overlay.mp4">BBOX</a></td>
+</tr>
+<tr>
+<td>DMD</td>
+<td>CM 4 / CFG 1</td>
+<td>100.487 / 102.367</td>
+<td style="text-align: right;">12.293</td>
+<td style="text-align: right;">18.556</td>
+<td style="text-align: right;">166.272</td>
+<td><a href="videos/dmd/gt-comparison.mp4">GT</a> · <a href="videos/dmd/map-overlay.mp4">MAP</a> · <a href="videos/dmd/bbox-overlay.mp4">BBOX</a></td>
+</tr>
+</tbody>
+</table>
+<p>每阶段源帧 51，展示 291 帧、24 fps、12.125 秒。两 rank 并行，推理耗时不相加。val0在各阶段固定seed=42；历史源帧0–10，生成源帧11–50。</p>
+<p>TF 历史源帧 5 的内容、相机位置和色调与 GT 基本对应，细节略软。history_exact 表示 latent 逐值保留；有损 VAE 重建不要求与 GT 像素逐值相同。</p>
+<p><img loading="lazy" alt="TF 历史重建" src="assets/tf-gt-history005.png" /></p>
+<p>TF 未来源帧 30 中道路与建筑可辨认，但存在边缘彩色条带、局部几何扭曲及车辆外观、位置差异。原始 Map/BBox 按同帧同视角叠加，部分控制与生成内容未精确贴合。</p>
+<p><img loading="lazy" alt="TF 未来帧 GT 对照" src="assets/tf-gt-frame030.png" /></p>
+<p><img loading="lazy" alt="TF Map" src="assets/tf-map-frame030.png" /></p>
+<p><img loading="lazy" alt="TF BBox" src="assets/tf-bbox-frame030.png" /></p>
+<h2>训练配置</h2>
+<p>数据为nuScenes的50个训练场景与2个独立验证场景，每个场景取起始51帧；本页各阶段展示同一条验证样本。六视角各256×512，历史11帧、未来40帧、每块10帧、历史窗口11。条件为文本、HD Map、BBox和ego action（x/y/yaw）。</p>
+<p>DSW双PPU-ZW810E，每卡batch=1，全局batch=2，无梯度累积；BF16计算、FP32归约、FSDP2、activation checkpointing，seed=42、workers=2。训练和正式配置使用同一代码路径。</p>
+<table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>更新目标</th>
+<th>AdamW学习率</th>
+<th>betas</th>
+<th>weight decay / grad clip</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TF</td>
+<td>25次</td>
+<td>2e-6</td>
+<td>(0, 0.999)</td>
+<td>0.01 / 10</td>
+</tr>
+<tr>
+<td>ODE初始化</td>
+<td>25次</td>
+<td>2e-6</td>
+<td>(0.9, 0.999)</td>
+<td>0.01 / 10</td>
+</tr>
+<tr>
+<td>DMD student</td>
+<td>实际5次</td>
+<td>2e-6</td>
+<td>(0, 0.999)</td>
+<td>0.01 / 10</td>
+</tr>
+<tr>
+<td>DMD fake</td>
+<td>25次</td>
+<td>4e-7</td>
+<td>(0, 0.999)</td>
+<td>0.01 / 10</td>
+</tr>
+</tbody>
+</table>
+<p>DMD每5个outer更新一次学生，实际更新发生在outer1/6/11/16/21；表中student末次loss对应outer21。其余outer仅更新fake。学生采用四步去噪，raw时间点1000/750/500/250，经shift=5得到sigma 1/0.9375/0.8333/0.625。教师轨迹采用48步Euler、shift=5、标准CFG=6；DMD real-score采用cond + 3×(cond−uncond)，等效标准CFG=4。EMA decay=0.99，从outer200启用，本轮导出和推理使用raw学生权重。</p>
+<h2>如何看视频</h2>
+<ul>
+<li>G0-100：观察蒸馏之前的六视角基准生成结果。</li>
+<li>TF-25：观察因果化、使用真实历史训练之后的生成结果。</li>
+<li>ODE-25：观察四步采样初始化后的生成效果。</li>
+<li>DMD outer-25：观察学生5次更新后的生成效果及控制一致性。</li>
+</ul>
+<p>生成＋GT采用左右对照；Map以亮青色、alpha=0.7叠加；BBox保留原框线颜色。六视角上排左前/前/右前，下排左后/后/右后；每个拼接视频内部按帧同步。亮青色仅用于展示，训练Map和编码条件保持原样。</p>
+<h2>扩展与限制</h2>
+<p>本轮验证双卡训练、保存、断点恢复、推理和展示链路，不代表模型收敛，也不构成算法优劣或等质量加速结论。G0/TF采用48步CFG6，ODE/DMD采用4步CFG1，采样设置不同。有限输出和历史latent一致不能替代视频质量评价。上述图像观察仅覆盖TF示例。</p>
+<p>正式扩展复用训练入口及TF/ODE/DMD配置，分别调整torchrun卡数与节点、每卡batch、数据范围、更新上限、epoch和num_workers；新实验使用独立输出目录。原TF命令的退出码和checkpoint耗时未单独记录，完成依据为完整rank记录、checkpoint、成功导出与W&amp;B finished；其余阶段训练、导出、推理及发布退出码均为0。</p>
+<p>参考：<a href="https://github.com/shengshu-ai/minWM">minWM官方实现</a> · <a href="https://arxiv.org/abs/2602.02214">Causal Forcing论文</a> · <a href="https://www.nuscenes.org/nuscenes">nuScenes</a>。</p></div></details>
+<footer><p>本轮为工程短测，验证流程可用，不代表模型收敛或等质量对比。G0/TF使用48步CFG6，ODE/DMD使用4步CFG1。Map亮青色仅用于展示，训练条件未修改。</p></footer>
+<script>
+const previewObserver = new IntersectionObserver(entries => {
+  for (const entry of entries) {
+    if (!entry.isIntersecting) continue;
+    entry.target.querySelectorAll('video').forEach(video => video.preload = 'metadata');
+    previewObserver.unobserve(entry.target);
+  }
+}, {rootMargin: '200px'});
+
+document.querySelectorAll('.comparison-row').forEach(row => {
+  const videos = [...row.querySelectorAll('video')];
+  let leader = videos[0];
+  let playing = false;
+  let holding = false;
+  const seekTargets = new WeakMap();
+  const pausedBySync = new WeakSet();
+  const playedBySync = new WeakSet();
+  const status = document.createElement('p');
+  status.setAttribute('role', 'status');
+  status.hidden = true;
+  row.parentElement.after(status);
+  previewObserver.observe(row);
+
+  function align(source, tolerance = 0.04) {
+    for (const video of videos) {
+      if (video === source || video.readyState === 0) continue;
+      if (Math.abs(video.currentTime - source.currentTime) > tolerance) {
+        seekTargets.set(video, source.currentTime);
+        video.currentTime = source.currentTime;
+      }
+    }
+  }
+
+  function pauseVideos() {
+    for (const video of videos) {
+      if (!video.paused) {
+        pausedBySync.add(video);
+        video.pause();
+      }
+    }
+  }
+
+  function hold() {
+    holding = true;
+    pauseVideos();
+    status.hidden = false;
+    status.textContent = '正在加载本组三段视频，就绪后同步播放…';
+  }
+
+  function showError(error) {
+    if (error.name === 'AbortError' && (holding || !playing)) return;
+    playing = false;
+    holding = false;
+    pauseVideos();
+    status.hidden = false;
+    status.textContent = '视频播放失败：' + error.message;
+    console.error(error);
+  }
+
+  function resumeWhenReady() {
+    if (!playing) return;
+    align(leader);
+    if (videos.some(video => video.readyState < 3 || video.seeking)) {
+      hold();
+      return;
+    }
+    holding = false;
+    status.hidden = true;
+    for (const video of videos) {
+      if (video.paused) {
+        playedBySync.add(video);
+        video.play().catch(showError);
+      }
+    }
+  }
+
+  for (const video of videos) {
+    video.addEventListener('play', () => {
+      if (playedBySync.delete(video)) return;
+      playing = true;
+      leader = video;
+      for (const peer of videos) peer.preload = 'auto';
+      resumeWhenReady();
+    });
+    video.addEventListener('pause', () => {
+      if (pausedBySync.delete(video) || !playing) return;
+      playing = false;
+      holding = false;
+      pauseVideos();
+      align(video);
+      status.hidden = true;
+    });
+    video.addEventListener('seeking', () => {
+      const target = seekTargets.get(video);
+      if (target !== undefined && Math.abs(video.currentTime - target) < 0.05) return;
+      leader = video;
+      align(leader);
+      resumeWhenReady();
+    });
+    video.addEventListener('seeked', () => {
+      seekTargets.delete(video);
+      resumeWhenReady();
+    });
+    video.addEventListener('loadedmetadata', () => align(leader));
+    video.addEventListener('canplay', resumeWhenReady);
+    video.addEventListener('waiting', () => {
+      if (playing) { hold(); align(leader); }
+    });
+    video.addEventListener('timeupdate', () => {
+      if (playing && !holding && video === leader && !video.seeking) align(leader, 0.10);
+    });
+    video.addEventListener('ratechange', () => {
+      for (const peer of videos) {
+        if (peer.playbackRate !== video.playbackRate) peer.playbackRate = video.playbackRate;
+      }
+    });
+    video.addEventListener('error', () => showError(new Error(
+      video.getAttribute('aria-label') + '加载失败，请检查视频链接。'
+    )));
+  }
+});
+</script></body></html>

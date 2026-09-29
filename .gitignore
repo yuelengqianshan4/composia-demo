@@ -1,0 +1,23 @@
+# 本仓库仅保存展示页面、报告和选定的媒体文件。
+.env
+.env.*
+.credentials/
+*.pem
+*.key
+*.safetensors
+*.ckpt
+*.pt
+*.pth
+*.pkl
+checkpoints/
+wandb/
+logs/
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.idea/
+.vscode/
+.ipynb_checkpoints/
+.DS_Store
