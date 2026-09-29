@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="G0 混合训练第 100 步权重的单条件推理：Text、HD-map、BBox、Action 分别开启，与原始 nuScenes GT 同步对照。">
+<title>G0-100 单条件对照 · CompoSIA 展示站</title>
+<style>
+*{box-sizing:border-box}
+body{font:16px/1.6 system-ui,sans-serif;margin:28px auto;padding:0 24px;max-width:2000px;background:#f5f6f8;color:#192331}
+h1{margin:8px 0}h2{font-size:24px;margin:28px 0 8px}h3{font-size:21px;margin:0 0 8px}p{margin:10px 0}
+a{color:#145bb5}a:hover{text-decoration:underline}
+header{margin-bottom:24px}nav{display:flex;flex-wrap:wrap;gap:8px 24px;margin:16px 0}
+article{min-width:0;background:white;padding:20px;border:1px solid #dbe0e7;border-radius:8px;margin:20px 0}
+figure{min-width:0;margin:12px 0 0}figcaption{margin:10px 0 0;font-size:14px;color:#596779}
+video{display:block;width:100%;aspect-ratio:3104/928;background:#111;border-radius:4px}
+.parameters{color:#37465a}.condition{font-size:14px;color:#596779}.section-note{margin-bottom:20px}
+footer{font-size:14px;color:#596779;margin:28px 0;border-top:1px solid #dbe0e7;padding-top:16px}
+@media(max-width:700px){body{padding:0 12px}article{padding:14px}h1{font-size:27px}}
+</style>
+</head>
+<body>
+<header>
+<a href="../">← CompoSIA 推理演示</a>
+<h1>G0-100 单条件对照</h1>
+<p>使用 10 / 40 帧未来长度混合训练的第 100 步 G0 权重，分别只开启 Text、HD-map、BBox 或 Action，并提供四路全关参考。每段视频左侧为生成，右侧为原始 GT；六个视角按相同帧号同步展示。</p>
+<p class="parameters">每视角 256×512 · 11 帧历史 + 40 帧未来 · 20 步去噪 · <strong>CFG 3</strong> · seed 42</p>
+<p>同一片段的五组实验复用相同历史、条件编码和初始噪声。视频前 11 帧为输入历史，后 40 帧为生成未来；源视频 12 FPS，对照视频 24 FPS 重复显示原帧，总长 4.25 秒。可全屏查看六视角细节。</p>
+<nav aria-label="片段导航"><a href="#validation">验证片段 · scene 133</a><a href="#train">训练片段 · scene 185</a><a href="experiment.json">实验参数</a></nav>
+</header>
+<main>
+<section id="validation" aria-labelledby="validation-title">
+<h2 id="validation-title">验证片段 · scene 133</h2>
+<p class="section-note">validation-scene-133-start-000 · 起始帧 0 · 路口右转、行人及停放的摩托车。原始描述：Cross T junction, peds, parked motorcycles, turn right, jaywalker.</p>
+<article id="validation-text"><h3>仅 Text</h3><p class="condition">Text 开；HD-map、BBox、Action 关。</p><figure>
+<video controls muted playsinline preload="none" poster="assets/validation/text-only.jpg" aria-label="验证片段，仅 Text：生成与原始 GT 对照" src="assets/validation/text-only.mp4"></video>
+<figcaption>左生成 / 右原始 GT · <a href="assets/validation/text-only.mp4">单独打开视频</a></figcaption></figure></article>
+<article id="validation-map"><h3>仅 HD-map</h3><p class="condition">HD-map 开；Text、BBox、Action 关。</p><figure>
+<video controls muted playsinline preload="none" poster="assets/validation/map-only.jpg" aria-label="验证片段，仅 HD-map：生成与原始 GT 对照" src="assets/validation/map-only.mp4"></video>
+<figcaption>左生成 / 右原始 GT · <a href="assets/validation/map-only.mp4">单独打开视频</a></figcaption></figure></article>
+<article id="validation-bbox"><h3>仅 BBox</h3><p class="condition">BBox 开；Text、HD-map、Action 关。</p><figure>
+<video controls muted playsinline preload="none" poster="assets/validation/bbox-only.jpg" aria-label="验证片段，仅 BBox：生成与原始 GT 对照" src="assets/validation/bbox-only.mp4"></video>
+<figcaption>左生成 / 右原始 GT · <a href="assets/validation/bbox-only.mp4">单独打开视频</a></figcaption></figure></article>
+<article id="validation-action"><h3>仅 Action</h3><p class="condition">Action 开；Text、HD-map、BBox 关。</p><figure>
+<video controls muted playsinline preload="none" poster="assets/validation/action-only.jpg" aria-label="验证片段，仅 Action：生成与原始 GT 对照" src="assets/validation/action-only.mp4"></video>
+<figcaption>左生成 / 右原始 GT · <a href="assets/validation/action-only.mp4">单独打开视频</a></figcaption></figure></article>
+<article id="validation-none"><h3>四路全关</h3><p class="condition">Text、HD-map、BBox、Action 全关，保留历史画面与视角标识。</p><figure>
+<video controls muted playsinline preload="none" poster="assets/validation/none.jpg" aria-label="验证片段，四路全关：生成与原始 GT 对照" src="assets/validation/none.mp4"></video>
+<figcaption>左生成 / 右原始 GT · <a href="assets/validation/none.mp4">单独打开视频</a></figcaption></figure></article>
+</section>
+<section id="train" aria-labelledby="train-title">
+<h2 id="train-title">训练片段 · scene 185</h2>
+<p class="section-note">train-003 · 起始帧 0 · 路口右转、卡车与公交车。原始描述：Wait at intersection, turn right, follow and overtake truck and bus.</p>
+<article id="train-text"><h3>仅 Text</h3><p class="condition">Text 开；HD-map、BBox、Action 关。</p><figure>
+<video controls muted playsinline preload="none" poster="assets/train/text-only.jpg" aria-label="训练片段，仅 Text：生成与原始 GT 对照" src="assets/train/text-only.mp4"></video>
+<figcaption>左生成 / 右原始 GT · <a href="assets/train/text-only.mp4">单独打开视频</a></figcaption></figure></article>
+<article id="train-map"><h3>仅 HD-map</h3><p class="condition">HD-map 开；Text、BBox、Action 关。</p><figure>
+<video controls muted playsinline preload="none" poster="assets/train/map-only.jpg" aria-label="训练片段，仅 HD-map：生成与原始 GT 对照" src="assets/train/map-only.mp4"></video>
+<figcaption>左生成 / 右原始 GT · <a href="assets/train/map-only.mp4">单独打开视频</a></figcaption></figure></article>
+<article id="train-bbox"><h3>仅 BBox</h3><p class="condition">BBox 开；Text、HD-map、Action 关。</p><figure>
+<video controls muted playsinline preload="none" poster="assets/train/bbox-only.jpg" aria-label="训练片段，仅 BBox：生成与原始 GT 对照" src="assets/train/bbox-only.mp4"></video>
+<figcaption>左生成 / 右原始 GT · <a href="assets/train/bbox-only.mp4">单独打开视频</a></figcaption></figure></article>
+<article id="train-action"><h3>仅 Action</h3><p class="condition">Action 开；Text、HD-map、BBox 关。</p><figure>
+<video controls muted playsinline preload="none" poster="assets/train/action-only.jpg" aria-label="训练片段，仅 Action：生成与原始 GT 对照" src="assets/train/action-only.mp4"></video>
+<figcaption>左生成 / 右原始 GT · <a href="assets/train/action-only.mp4">单独打开视频</a></figcaption></figure></article>
+<article id="train-none"><h3>四路全关</h3><p class="condition">Text、HD-map、BBox、Action 全关，保留历史画面与视角标识。</p><figure>
+<video controls muted playsinline preload="none" poster="assets/train/none.jpg" aria-label="训练片段，四路全关：生成与原始 GT 对照" src="assets/train/none.mp4"></video>
+<figcaption>左生成 / 右原始 GT · <a href="assets/train/none.mp4">单独打开视频</a></figcaption></figure></article>
+</section>
+</main>
+<footer>
+<p>观察范围：本页展示两个片段、一个种子的独立条件响应。判断时关注开启条件后是否更符合对应内容；画面变化本身不代表控制正确。单条件效果不直接等同于多条件联合输入时的作用，训练新增收益需要与初始化权重做同设置对照。</p>
+<p>模型初始化：<a href="https://github.com/Yifever20002/CompoSIA">CompoSIA</a> · 场景数据：<a href="https://www.nuscenes.org/nuscenes">nuScenes</a> · <a href="../">返回展示站首页</a></p>
+</footer>
+</body>
+</html>
