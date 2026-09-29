@@ -20,12 +20,12 @@
 </header>
 <section class="panel" aria-label="条件与视频对照">
 <h2>选择生成条件</h2>
-<p id="generation-progress">已完成：全条件、仅 Text。仅 Map / BBox / Action 正在生成，完成后补齐。</p>
+<p id="generation-progress">已完成：全条件、仅 Text、仅 Map、仅 BBox。仅 Action 正在生成，完成后补齐。</p>
 <div class="conditions" role="group" aria-label="生成条件">
 <button type="button" data-variant="all" aria-pressed="true">全条件</button>
 <button type="button" data-variant="text-only" aria-pressed="false">仅 Text</button>
-<button type="button" data-variant="map-only" disabled title="生成中" aria-pressed="false">仅 Map</button>
-<button type="button" data-variant="bbox-only" disabled title="生成中" aria-pressed="false">仅 BBox</button>
+<button type="button" data-variant="map-only" aria-pressed="false">仅 Map</button>
+<button type="button" data-variant="bbox-only" aria-pressed="false">仅 BBox</button>
 <button type="button" data-variant="action-only" disabled title="生成中" aria-pressed="false">仅 Action</button>
 </div>
 <div class="badges" aria-label="条件启用状态" aria-live="polite">
